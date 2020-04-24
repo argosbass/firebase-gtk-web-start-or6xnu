@@ -75,12 +75,20 @@ firebase.auth().onAuthStateChanged( (user)=>{
   if(user)
   {
     startRsvpButton.textContent = 'LOGOUT';
+    
     guestbookContainer.style.display = "block";
+    
+    suscribeGuestbook();
+
   }
   else
   {
     startRsvpButton.textContent = 'RSVP';
+    
     guestbookContainer.style.display = "none";
+
+    unsuscribeGuestbook();
+
   }
 
 } );
@@ -101,3 +109,37 @@ form.addEventListener("submit", (e)=>{
   return false;
   
 });
+
+
+function suscribeGuestbook()
+{
+ guestbookListener =
+  firebase.firestore().collection("guestbook")
+  .orderBy("timestamp","desc").onSnapshot((snaps) =>
+    {
+      guestbook.innerHTML = "";
+
+      snaps.forEach( (doc)=>{ 
+
+        const entry = document.createElement("p");
+        entry.textContent = doc.data().name + ": " + doc.data().text;
+
+        guestbook.appendChild(entry); 
+
+      } );
+    } );
+}
+function unsuscribeGuestbook()
+{
+  if(guestbookListener != null)
+  {
+    // llamarlo primero para que mantenga
+    //  la conection
+    guestbookListener();
+
+    guestbookListener = null;
+
+  }
+}
+
+
